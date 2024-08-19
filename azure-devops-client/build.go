@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/url"
+	"sort"
 	"strings"
 	"time"
 )
@@ -119,102 +120,168 @@ func (c *AzureDevopsClient) ListBuilds(project string) (list BuildList, error er
 	defer c.concurrencyUnlock()
 	c.concurrencyLock()
 
-	url := fmt.Sprintf(
-		"%v/_apis/build/builds?api-version=%v&maxBuildsPerDefinition=%s&deletedFilter=excludeDeleted",
-		url.QueryEscape(project),
-		url.QueryEscape(c.ApiVersion),
-		url.QueryEscape(int64ToString(c.LimitBuildsPerDefinition)),
-	)
-	response, err := c.rest().R().Get(url)
-	if err := c.checkResponse(response, err); err != nil {
-		error = err
-		return
-	}
+	branches := []string{"refs/heads/main", "refs/heads/master"}
+	var mergedBuilds BuildList
 
-	err = json.Unmarshal(response.Body(), &list)
-	if err != nil {
-		error = err
-		return
-	}
+	for _, branch := range branches {
 
-	return
+		url := fmt.Sprintf(
+			"%v/_apis/build/builds?api-version=%v&maxBuildsPerDefinition=%s&deletedFilter=excludeDeleted&branchName=%s",
+			url.QueryEscape(project),
+			url.QueryEscape(c.ApiVersion),
+			url.QueryEscape(int64ToString(c.LimitBuildsPerDefinition)),
+			url.QueryEscape(branch),
+		)
+		response, err := c.rest().R().Get(url)
+		if err := c.checkResponse(response, err); err != nil {
+			error = err
+			return mergedBuilds, err
+		}
+
+		var branchBuilds BuildList
+		err = json.Unmarshal(response.Body(), &branchBuilds)
+		if err != nil {
+			return mergedBuilds, err
+		}
+
+		// Append the builds from the current branch to the merged list
+		mergedBuilds.List = append(mergedBuilds.List, branchBuilds.List...)
+		// Update the count
+		mergedBuilds.Count += branchBuilds.Count
+
+	}
+	sort.Slice(mergedBuilds.List, func(i, j int) bool {
+		return mergedBuilds.List[i].FinishTime.After(mergedBuilds.List[j].FinishTime)
+	})
+
+	return mergedBuilds, nil
+
 }
 
 func (c *AzureDevopsClient) ListLatestBuilds(project string) (list BuildList, error error) {
 	defer c.concurrencyUnlock()
 	c.concurrencyLock()
 
-	url := fmt.Sprintf(
-		"%v/_apis/build/builds?api-version=%v&maxBuildsPerDefinition=%s&deletedFilter=excludeDeleted",
-		url.QueryEscape(project),
-		url.QueryEscape(c.ApiVersion),
-		url.QueryEscape("1"),
-	)
-	response, err := c.rest().R().Get(url)
-	if err := c.checkResponse(response, err); err != nil {
-		error = err
-		return
-	}
+	branches := []string{"refs/heads/main", "refs/heads/master"}
+	var mergedBuilds BuildList
 
-	err = json.Unmarshal(response.Body(), &list)
-	if err != nil {
-		error = err
-		return
-	}
+	for _, branch := range branches {
 
-	return
+		url := fmt.Sprintf(
+			"%v/_apis/build/builds?api-version=%v&maxBuildsPerDefinition=%s&deletedFilter=excludeDeleted&branchName=%s",
+			url.QueryEscape(project),
+			url.QueryEscape(c.ApiVersion),
+			url.QueryEscape("1"),
+			url.QueryEscape(branch),
+		)
+		response, err := c.rest().R().Get(url)
+		if err := c.checkResponse(response, err); err != nil {
+			error = err
+			return mergedBuilds, err
+		}
+
+		var branchBuilds BuildList
+		err = json.Unmarshal(response.Body(), &branchBuilds)
+		if err != nil {
+			return mergedBuilds, err
+		}
+
+		// Append the builds from the current branch to the merged list
+		mergedBuilds.List = append(mergedBuilds.List, branchBuilds.List...)
+		// Update the count
+		mergedBuilds.Count += branchBuilds.Count
+
+	}
+	sort.Slice(mergedBuilds.List, func(i, j int) bool {
+		return mergedBuilds.List[i].FinishTime.After(mergedBuilds.List[j].FinishTime)
+	})
+
+	return mergedBuilds, nil
+
 }
 
 func (c *AzureDevopsClient) ListBuildHistory(project string, minTime time.Time) (list BuildList, error error) {
 	defer c.concurrencyUnlock()
 	c.concurrencyLock()
 
-	url := fmt.Sprintf(
-		"%v/_apis/build/builds?api-version=%v&minTime=%s&$top=%v&queryOrder=finishTimeDescending",
-		url.QueryEscape(project),
-		url.QueryEscape(c.ApiVersion),
-		url.QueryEscape(minTime.Format(time.RFC3339)),
-		url.QueryEscape(int64ToString(c.LimitBuildsPerProject)),
-	)
-	response, err := c.rest().R().Get(url)
-	if err := c.checkResponse(response, err); err != nil {
-		error = err
-		return
+	branches := []string{"refs/heads/main", "refs/heads/master"}
+	var mergedBuilds BuildList
+
+	for _, branch := range branches {
+
+		url := fmt.Sprintf(
+			"%v/_apis/build/builds?api-version=%v&minTime=%s&$top=%v&queryOrder=finishTimeDescending&branchName=%s",
+			url.QueryEscape(project),
+			url.QueryEscape(c.ApiVersion),
+			url.QueryEscape(minTime.Format(time.RFC3339)),
+			url.QueryEscape(int64ToString(c.LimitBuildsPerProject)),
+			url.QueryEscape(branch),
+		)
+		response, err := c.rest().R().Get(url)
+		if err := c.checkResponse(response, err); err != nil {
+			error = err
+			return mergedBuilds, err
+		}
+
+		var branchBuilds BuildList
+		err = json.Unmarshal(response.Body(), &branchBuilds)
+		if err != nil {
+			return mergedBuilds, err
+		}
+
+		// Append the builds from the current branch to the merged list
+		mergedBuilds.List = append(mergedBuilds.List, branchBuilds.List...)
+		// Update the count
+		mergedBuilds.Count += branchBuilds.Count
 	}
 
-	err = json.Unmarshal(response.Body(), &list)
-	if err != nil {
-		error = err
-		return
-	}
+	sort.Slice(mergedBuilds.List, func(i, j int) bool {
+		return mergedBuilds.List[i].FinishTime.After(mergedBuilds.List[j].FinishTime)
+	})
 
-	return
+	return mergedBuilds, nil
 }
 
 func (c *AzureDevopsClient) ListBuildHistoryWithStatus(project string, minTime time.Time, statusFilter string) (list BuildList, error error) {
 	defer c.concurrencyUnlock()
 	c.concurrencyLock()
 
-	url := fmt.Sprintf(
-		"%v/_apis/build/builds?api-version=%v&minTime=%s&statusFilter=%v",
-		url.QueryEscape(project),
-		url.QueryEscape(c.ApiVersion),
-		url.QueryEscape(minTime.Format(time.RFC3339)),
-		url.QueryEscape(statusFilter),
-	)
-	response, err := c.rest().R().Get(url)
-	if err := c.checkResponse(response, err); err != nil {
-		error = err
-		return
+	branches := []string{"refs/heads/main", "refs/heads/master"}
+	var mergedBuilds BuildList
+
+	for _, branch := range branches {
+
+		url := fmt.Sprintf(
+			"%v/_apis/build/builds?api-version=%v&minTime=%s&statusFilter=%v&branchName=%s",
+			url.QueryEscape(project),
+			url.QueryEscape(c.ApiVersion),
+			url.QueryEscape(minTime.Format(time.RFC3339)),
+			url.QueryEscape(statusFilter),
+			url.QueryEscape(branch),
+		)
+		response, err := c.rest().R().Get(url)
+		if err := c.checkResponse(response, err); err != nil {
+			error = err
+			return mergedBuilds, err
+		}
+
+		var branchBuilds BuildList
+		err = json.Unmarshal(response.Body(), &branchBuilds)
+		if err != nil {
+			return mergedBuilds, err
+		}
+
+		// Append the builds from the current branch to the merged list
+		mergedBuilds.List = append(mergedBuilds.List, branchBuilds.List...)
+		// Update the count
+		mergedBuilds.Count += branchBuilds.Count
 	}
 
-	err = json.Unmarshal(response.Body(), &list)
-	if err != nil {
-		error = err
-		return
-	}
+	sort.Slice(mergedBuilds.List, func(i, j int) bool {
+		return mergedBuilds.List[i].FinishTime.After(mergedBuilds.List[j].FinishTime)
+	})
 
-	return
+	return mergedBuilds, nil
 }
 
 func (c *AzureDevopsClient) ListBuildTimeline(project string, buildID string) (list TimelineRecordList, error error) {

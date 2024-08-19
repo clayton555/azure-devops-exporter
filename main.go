@@ -226,17 +226,17 @@ func initMetricCollector() {
 	// 	logger.With(zap.String("collector", collectorName)).Info("collector disabled")
 	// }
 
-	// collectorName = "LatestBuild"
-	// if opts.Scrape.TimeLive.Seconds() > 0 {
-	// 	c := collector.New(collectorName, &MetricsCollectorLatestBuild{}, logger)
-	// 	c.SetScapeTime(*opts.Scrape.TimeLive)
-	// 	c.SetCache(opts.GetCachePath("latestbuild.json"), collector.BuildCacheTag(cacheTag, opts.AzureDevops))
-	// 	if err := c.Start(); err != nil {
-	// 		logger.Fatal(err.Error())
-	// 	}
-	// } else {
-	// 	logger.With(zap.String("collector", collectorName)).Info("collector disabled")
-	// }
+	collectorName = "LatestBuild"
+	if opts.Scrape.TimeLive.Seconds() > 0 {
+		c := collector.New(collectorName, &MetricsCollectorLatestBuild{}, logger)
+		c.SetScapeTime(*opts.Scrape.TimeLive)
+		c.SetCache(opts.GetCachePath("latestbuild.json"), collector.BuildCacheTag(cacheTag, opts.AzureDevops))
+		if err := c.Start(); err != nil {
+			logger.Fatal(err.Error())
+		}
+	} else {
+		logger.With(zap.String("collector", collectorName)).Info("collector disabled")
+	}
 
 	collectorName = "Repository"
 	if opts.Scrape.TimeRepository.Seconds() > 0 {
