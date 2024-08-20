@@ -198,7 +198,7 @@ func (m *MetricsCollectorBuild) Collect(callback chan<- func()) {
 		projectLogger := logger.With(zap.String("project", project.Name))
 		m.collectDefinition(ctx, projectLogger, callback, project)
 		m.collectBuilds(ctx, projectLogger, callback, project)
-		// m.collectBuildsTimeline(ctx, projectLogger, callback, project)
+		m.collectBuildsTimeline(ctx, projectLogger, callback, project)
 		if nil != opts.AzureDevops.TagsSchema {
 			m.collectBuildsTags(ctx, projectLogger, callback, project)
 		}
@@ -311,9 +311,9 @@ func (m *MetricsCollectorBuild) collectBuildsTimeline(ctx context.Context, logge
 	}
 
 	buildStageMetric := m.Collector.GetMetricList("buildStage")
-	buildPhaseMetric := m.Collector.GetMetricList("buildPhase")
-	buildJobMetric := m.Collector.GetMetricList("buildJob")
-	buildTaskMetric := m.Collector.GetMetricList("buildTask")
+	// buildPhaseMetric := m.Collector.GetMetricList("buildPhase")
+	// buildJobMetric := m.Collector.GetMetricList("buildJob")
+	// buildTaskMetric := m.Collector.GetMetricList("buildTask")
 
 	for _, build := range list.List {
 		timelineRecordList, _ := AzureDevopsClient.ListBuildTimeline(project.Id, int64ToString(build.Id))
@@ -393,242 +393,242 @@ func (m *MetricsCollectorBuild) collectBuildsTimeline(ctx context.Context, logge
 					"type":              "duration",
 				}, timelineRecord.FinishTime.Sub(timelineRecord.StartTime))
 
-			case "phase":
-				buildPhaseMetric.Add(prometheus.Labels{
-					"projectID":         project.Id,
-					"buildID":           int64ToString(build.Id),
-					"buildDefinitionID": int64ToString(build.Definition.Id),
-					"buildNumber":       build.BuildNumber,
-					"name":              timelineRecord.Name,
-					"id":                timelineRecord.Id,
-					"parentId":          timelineRecord.ParentId,
-					"identifier":        timelineRecord.Identifier,
-					"result":            timelineRecord.Result,
-					"type":              "errorCount",
-				}, timelineRecord.ErrorCount)
+				// case "phase":
+				// 	buildPhaseMetric.Add(prometheus.Labels{
+				// 		"projectID":         project.Id,
+				// 		"buildID":           int64ToString(build.Id),
+				// 		"buildDefinitionID": int64ToString(build.Definition.Id),
+				// 		"buildNumber":       build.BuildNumber,
+				// 		"name":              timelineRecord.Name,
+				// 		"id":                timelineRecord.Id,
+				// 		"parentId":          timelineRecord.ParentId,
+				// 		"identifier":        timelineRecord.Identifier,
+				// 		"result":            timelineRecord.Result,
+				// 		"type":              "errorCount",
+				// 	}, timelineRecord.ErrorCount)
 
-				buildPhaseMetric.Add(prometheus.Labels{
-					"projectID":         project.Id,
-					"buildID":           int64ToString(build.Id),
-					"buildDefinitionID": int64ToString(build.Definition.Id),
-					"buildNumber":       build.BuildNumber,
-					"name":              timelineRecord.Name,
-					"id":                timelineRecord.Id,
-					"parentId":          timelineRecord.ParentId,
-					"identifier":        timelineRecord.Identifier,
-					"result":            timelineRecord.Result,
-					"type":              "warningCount",
-				}, timelineRecord.WarningCount)
+				// 	buildPhaseMetric.Add(prometheus.Labels{
+				// 		"projectID":         project.Id,
+				// 		"buildID":           int64ToString(build.Id),
+				// 		"buildDefinitionID": int64ToString(build.Definition.Id),
+				// 		"buildNumber":       build.BuildNumber,
+				// 		"name":              timelineRecord.Name,
+				// 		"id":                timelineRecord.Id,
+				// 		"parentId":          timelineRecord.ParentId,
+				// 		"identifier":        timelineRecord.Identifier,
+				// 		"result":            timelineRecord.Result,
+				// 		"type":              "warningCount",
+				// 	}, timelineRecord.WarningCount)
 
-				buildPhaseMetric.AddBool(prometheus.Labels{
-					"projectID":         project.Id,
-					"buildID":           int64ToString(build.Id),
-					"buildDefinitionID": int64ToString(build.Definition.Id),
-					"buildNumber":       build.BuildNumber,
-					"name":              timelineRecord.Name,
-					"id":                timelineRecord.Id,
-					"parentId":          timelineRecord.ParentId,
-					"identifier":        timelineRecord.Identifier,
-					"result":            timelineRecord.Result,
-					"type":              "succeeded",
-				}, timelineRecord.Result == "succeeded")
+				// 	buildPhaseMetric.AddBool(prometheus.Labels{
+				// 		"projectID":         project.Id,
+				// 		"buildID":           int64ToString(build.Id),
+				// 		"buildDefinitionID": int64ToString(build.Definition.Id),
+				// 		"buildNumber":       build.BuildNumber,
+				// 		"name":              timelineRecord.Name,
+				// 		"id":                timelineRecord.Id,
+				// 		"parentId":          timelineRecord.ParentId,
+				// 		"identifier":        timelineRecord.Identifier,
+				// 		"result":            timelineRecord.Result,
+				// 		"type":              "succeeded",
+				// 	}, timelineRecord.Result == "succeeded")
 
-				buildPhaseMetric.AddTime(prometheus.Labels{
-					"projectID":         project.Id,
-					"buildID":           int64ToString(build.Id),
-					"buildDefinitionID": int64ToString(build.Definition.Id),
-					"buildNumber":       build.BuildNumber,
-					"name":              timelineRecord.Name,
-					"id":                timelineRecord.Id,
-					"parentId":          timelineRecord.ParentId,
-					"identifier":        timelineRecord.Identifier,
-					"result":            timelineRecord.Result,
-					"type":              "started",
-				}, timelineRecord.StartTime)
+				// 	buildPhaseMetric.AddTime(prometheus.Labels{
+				// 		"projectID":         project.Id,
+				// 		"buildID":           int64ToString(build.Id),
+				// 		"buildDefinitionID": int64ToString(build.Definition.Id),
+				// 		"buildNumber":       build.BuildNumber,
+				// 		"name":              timelineRecord.Name,
+				// 		"id":                timelineRecord.Id,
+				// 		"parentId":          timelineRecord.ParentId,
+				// 		"identifier":        timelineRecord.Identifier,
+				// 		"result":            timelineRecord.Result,
+				// 		"type":              "started",
+				// 	}, timelineRecord.StartTime)
 
-				buildPhaseMetric.AddTime(prometheus.Labels{
-					"projectID":         project.Id,
-					"buildID":           int64ToString(build.Id),
-					"buildDefinitionID": int64ToString(build.Definition.Id),
-					"buildNumber":       build.BuildNumber,
-					"name":              timelineRecord.Name,
-					"id":                timelineRecord.Id,
-					"parentId":          timelineRecord.ParentId,
-					"identifier":        timelineRecord.Identifier,
-					"result":            timelineRecord.Result,
-					"type":              "finished",
-				}, timelineRecord.FinishTime)
+				// 	buildPhaseMetric.AddTime(prometheus.Labels{
+				// 		"projectID":         project.Id,
+				// 		"buildID":           int64ToString(build.Id),
+				// 		"buildDefinitionID": int64ToString(build.Definition.Id),
+				// 		"buildNumber":       build.BuildNumber,
+				// 		"name":              timelineRecord.Name,
+				// 		"id":                timelineRecord.Id,
+				// 		"parentId":          timelineRecord.ParentId,
+				// 		"identifier":        timelineRecord.Identifier,
+				// 		"result":            timelineRecord.Result,
+				// 		"type":              "finished",
+				// 	}, timelineRecord.FinishTime)
 
-				buildPhaseMetric.AddDuration(prometheus.Labels{
-					"projectID":         project.Id,
-					"buildID":           int64ToString(build.Id),
-					"buildDefinitionID": int64ToString(build.Definition.Id),
-					"buildNumber":       build.BuildNumber,
-					"name":              timelineRecord.Name,
-					"id":                timelineRecord.Id,
-					"parentId":          timelineRecord.ParentId,
-					"identifier":        timelineRecord.Identifier,
-					"result":            timelineRecord.Result,
-					"type":              "duration",
-				}, timelineRecord.FinishTime.Sub(timelineRecord.StartTime))
+				// 	buildPhaseMetric.AddDuration(prometheus.Labels{
+				// 		"projectID":         project.Id,
+				// 		"buildID":           int64ToString(build.Id),
+				// 		"buildDefinitionID": int64ToString(build.Definition.Id),
+				// 		"buildNumber":       build.BuildNumber,
+				// 		"name":              timelineRecord.Name,
+				// 		"id":                timelineRecord.Id,
+				// 		"parentId":          timelineRecord.ParentId,
+				// 		"identifier":        timelineRecord.Identifier,
+				// 		"result":            timelineRecord.Result,
+				// 		"type":              "duration",
+				// 	}, timelineRecord.FinishTime.Sub(timelineRecord.StartTime))
 
-			case "job":
-				buildJobMetric.Add(prometheus.Labels{
-					"projectID":         project.Id,
-					"buildID":           int64ToString(build.Id),
-					"buildDefinitionID": int64ToString(build.Definition.Id),
-					"buildNumber":       build.BuildNumber,
-					"name":              timelineRecord.Name,
-					"id":                timelineRecord.Id,
-					"parentId":          timelineRecord.ParentId,
-					"identifier":        timelineRecord.Identifier,
-					"result":            timelineRecord.Result,
-					"type":              "errorCount",
-				}, timelineRecord.ErrorCount)
+				// case "job":
+				// 	buildJobMetric.Add(prometheus.Labels{
+				// 		"projectID":         project.Id,
+				// 		"buildID":           int64ToString(build.Id),
+				// 		"buildDefinitionID": int64ToString(build.Definition.Id),
+				// 		"buildNumber":       build.BuildNumber,
+				// 		"name":              timelineRecord.Name,
+				// 		"id":                timelineRecord.Id,
+				// 		"parentId":          timelineRecord.ParentId,
+				// 		"identifier":        timelineRecord.Identifier,
+				// 		"result":            timelineRecord.Result,
+				// 		"type":              "errorCount",
+				// 	}, timelineRecord.ErrorCount)
 
-				buildJobMetric.Add(prometheus.Labels{
-					"projectID":         project.Id,
-					"buildID":           int64ToString(build.Id),
-					"buildDefinitionID": int64ToString(build.Definition.Id),
-					"buildNumber":       build.BuildNumber,
-					"name":              timelineRecord.Name,
-					"id":                timelineRecord.Id,
-					"parentId":          timelineRecord.ParentId,
-					"identifier":        timelineRecord.Identifier,
-					"result":            timelineRecord.Result,
-					"type":              "warningCount",
-				}, timelineRecord.WarningCount)
+				// 	buildJobMetric.Add(prometheus.Labels{
+				// 		"projectID":         project.Id,
+				// 		"buildID":           int64ToString(build.Id),
+				// 		"buildDefinitionID": int64ToString(build.Definition.Id),
+				// 		"buildNumber":       build.BuildNumber,
+				// 		"name":              timelineRecord.Name,
+				// 		"id":                timelineRecord.Id,
+				// 		"parentId":          timelineRecord.ParentId,
+				// 		"identifier":        timelineRecord.Identifier,
+				// 		"result":            timelineRecord.Result,
+				// 		"type":              "warningCount",
+				// 	}, timelineRecord.WarningCount)
 
-				buildJobMetric.AddBool(prometheus.Labels{
-					"projectID":         project.Id,
-					"buildID":           int64ToString(build.Id),
-					"buildDefinitionID": int64ToString(build.Definition.Id),
-					"buildNumber":       build.BuildNumber,
-					"name":              timelineRecord.Name,
-					"id":                timelineRecord.Id,
-					"parentId":          timelineRecord.ParentId,
-					"identifier":        timelineRecord.Identifier,
-					"result":            timelineRecord.Result,
-					"type":              "succeeded",
-				}, timelineRecord.Result == "succeeded")
+				// 	buildJobMetric.AddBool(prometheus.Labels{
+				// 		"projectID":         project.Id,
+				// 		"buildID":           int64ToString(build.Id),
+				// 		"buildDefinitionID": int64ToString(build.Definition.Id),
+				// 		"buildNumber":       build.BuildNumber,
+				// 		"name":              timelineRecord.Name,
+				// 		"id":                timelineRecord.Id,
+				// 		"parentId":          timelineRecord.ParentId,
+				// 		"identifier":        timelineRecord.Identifier,
+				// 		"result":            timelineRecord.Result,
+				// 		"type":              "succeeded",
+				// 	}, timelineRecord.Result == "succeeded")
 
-				buildJobMetric.AddTime(prometheus.Labels{
-					"projectID":         project.Id,
-					"buildID":           int64ToString(build.Id),
-					"buildDefinitionID": int64ToString(build.Definition.Id),
-					"buildNumber":       build.BuildNumber,
-					"name":              timelineRecord.Name,
-					"id":                timelineRecord.Id,
-					"parentId":          timelineRecord.ParentId,
-					"identifier":        timelineRecord.Identifier,
-					"result":            timelineRecord.Result,
-					"type":              "started",
-				}, timelineRecord.StartTime)
+				// 	buildJobMetric.AddTime(prometheus.Labels{
+				// 		"projectID":         project.Id,
+				// 		"buildID":           int64ToString(build.Id),
+				// 		"buildDefinitionID": int64ToString(build.Definition.Id),
+				// 		"buildNumber":       build.BuildNumber,
+				// 		"name":              timelineRecord.Name,
+				// 		"id":                timelineRecord.Id,
+				// 		"parentId":          timelineRecord.ParentId,
+				// 		"identifier":        timelineRecord.Identifier,
+				// 		"result":            timelineRecord.Result,
+				// 		"type":              "started",
+				// 	}, timelineRecord.StartTime)
 
-				buildJobMetric.AddTime(prometheus.Labels{
-					"projectID":         project.Id,
-					"buildID":           int64ToString(build.Id),
-					"buildDefinitionID": int64ToString(build.Definition.Id),
-					"buildNumber":       build.BuildNumber,
-					"name":              timelineRecord.Name,
-					"id":                timelineRecord.Id,
-					"parentId":          timelineRecord.ParentId,
-					"identifier":        timelineRecord.Identifier,
-					"result":            timelineRecord.Result,
-					"type":              "finished",
-				}, timelineRecord.FinishTime)
+				// 	buildJobMetric.AddTime(prometheus.Labels{
+				// 		"projectID":         project.Id,
+				// 		"buildID":           int64ToString(build.Id),
+				// 		"buildDefinitionID": int64ToString(build.Definition.Id),
+				// 		"buildNumber":       build.BuildNumber,
+				// 		"name":              timelineRecord.Name,
+				// 		"id":                timelineRecord.Id,
+				// 		"parentId":          timelineRecord.ParentId,
+				// 		"identifier":        timelineRecord.Identifier,
+				// 		"result":            timelineRecord.Result,
+				// 		"type":              "finished",
+				// 	}, timelineRecord.FinishTime)
 
-				buildJobMetric.AddDuration(prometheus.Labels{
-					"projectID":         project.Id,
-					"buildID":           int64ToString(build.Id),
-					"buildDefinitionID": int64ToString(build.Definition.Id),
-					"buildNumber":       build.BuildNumber,
-					"name":              timelineRecord.Name,
-					"id":                timelineRecord.Id,
-					"parentId":          timelineRecord.ParentId,
-					"identifier":        timelineRecord.Identifier,
-					"result":            timelineRecord.Result,
-					"type":              "duration",
-				}, timelineRecord.FinishTime.Sub(timelineRecord.StartTime))
+				// 	buildJobMetric.AddDuration(prometheus.Labels{
+				// 		"projectID":         project.Id,
+				// 		"buildID":           int64ToString(build.Id),
+				// 		"buildDefinitionID": int64ToString(build.Definition.Id),
+				// 		"buildNumber":       build.BuildNumber,
+				// 		"name":              timelineRecord.Name,
+				// 		"id":                timelineRecord.Id,
+				// 		"parentId":          timelineRecord.ParentId,
+				// 		"identifier":        timelineRecord.Identifier,
+				// 		"result":            timelineRecord.Result,
+				// 		"type":              "duration",
+				// 	}, timelineRecord.FinishTime.Sub(timelineRecord.StartTime))
 
-			case "task":
-				buildTaskMetric.Add(prometheus.Labels{
-					"projectID":         project.Id,
-					"buildID":           int64ToString(build.Id),
-					"buildDefinitionID": int64ToString(build.Definition.Id),
-					"buildNumber":       build.BuildNumber,
-					"name":              timelineRecord.Name,
-					"id":                timelineRecord.Id,
-					"parentId":          timelineRecord.ParentId,
-					"workerName":        timelineRecord.WorkerName,
-					"result":            timelineRecord.Result,
-					"type":              "errorCount",
-				}, timelineRecord.ErrorCount)
+				// case "task":
+				// 	buildTaskMetric.Add(prometheus.Labels{
+				// 		"projectID":         project.Id,
+				// 		"buildID":           int64ToString(build.Id),
+				// 		"buildDefinitionID": int64ToString(build.Definition.Id),
+				// 		"buildNumber":       build.BuildNumber,
+				// 		"name":              timelineRecord.Name,
+				// 		"id":                timelineRecord.Id,
+				// 		"parentId":          timelineRecord.ParentId,
+				// 		"workerName":        timelineRecord.WorkerName,
+				// 		"result":            timelineRecord.Result,
+				// 		"type":              "errorCount",
+				// 	}, timelineRecord.ErrorCount)
 
-				buildTaskMetric.Add(prometheus.Labels{
-					"projectID":         project.Id,
-					"buildID":           int64ToString(build.Id),
-					"buildDefinitionID": int64ToString(build.Definition.Id),
-					"buildNumber":       build.BuildNumber,
-					"name":              timelineRecord.Name,
-					"id":                timelineRecord.Id,
-					"parentId":          timelineRecord.ParentId,
-					"workerName":        timelineRecord.WorkerName,
-					"result":            timelineRecord.Result,
-					"type":              "warningCount",
-				}, timelineRecord.WarningCount)
+				// 	buildTaskMetric.Add(prometheus.Labels{
+				// 		"projectID":         project.Id,
+				// 		"buildID":           int64ToString(build.Id),
+				// 		"buildDefinitionID": int64ToString(build.Definition.Id),
+				// 		"buildNumber":       build.BuildNumber,
+				// 		"name":              timelineRecord.Name,
+				// 		"id":                timelineRecord.Id,
+				// 		"parentId":          timelineRecord.ParentId,
+				// 		"workerName":        timelineRecord.WorkerName,
+				// 		"result":            timelineRecord.Result,
+				// 		"type":              "warningCount",
+				// 	}, timelineRecord.WarningCount)
 
-				buildTaskMetric.AddBool(prometheus.Labels{
-					"projectID":         project.Id,
-					"buildID":           int64ToString(build.Id),
-					"buildDefinitionID": int64ToString(build.Definition.Id),
-					"buildNumber":       build.BuildNumber,
-					"name":              timelineRecord.Name,
-					"id":                timelineRecord.Id,
-					"parentId":          timelineRecord.ParentId,
-					"workerName":        timelineRecord.WorkerName,
-					"result":            timelineRecord.Result,
-					"type":              "succeeded",
-				}, timelineRecord.Result == "succeeded")
+				// 	buildTaskMetric.AddBool(prometheus.Labels{
+				// 		"projectID":         project.Id,
+				// 		"buildID":           int64ToString(build.Id),
+				// 		"buildDefinitionID": int64ToString(build.Definition.Id),
+				// 		"buildNumber":       build.BuildNumber,
+				// 		"name":              timelineRecord.Name,
+				// 		"id":                timelineRecord.Id,
+				// 		"parentId":          timelineRecord.ParentId,
+				// 		"workerName":        timelineRecord.WorkerName,
+				// 		"result":            timelineRecord.Result,
+				// 		"type":              "succeeded",
+				// 	}, timelineRecord.Result == "succeeded")
 
-				buildTaskMetric.AddTime(prometheus.Labels{
-					"projectID":         project.Id,
-					"buildID":           int64ToString(build.Id),
-					"buildDefinitionID": int64ToString(build.Definition.Id),
-					"buildNumber":       build.BuildNumber,
-					"name":              timelineRecord.Name,
-					"id":                timelineRecord.Id,
-					"parentId":          timelineRecord.ParentId,
-					"workerName":        timelineRecord.WorkerName,
-					"result":            timelineRecord.Result,
-					"type":              "started",
-				}, timelineRecord.StartTime)
+				// 	buildTaskMetric.AddTime(prometheus.Labels{
+				// 		"projectID":         project.Id,
+				// 		"buildID":           int64ToString(build.Id),
+				// 		"buildDefinitionID": int64ToString(build.Definition.Id),
+				// 		"buildNumber":       build.BuildNumber,
+				// 		"name":              timelineRecord.Name,
+				// 		"id":                timelineRecord.Id,
+				// 		"parentId":          timelineRecord.ParentId,
+				// 		"workerName":        timelineRecord.WorkerName,
+				// 		"result":            timelineRecord.Result,
+				// 		"type":              "started",
+				// 	}, timelineRecord.StartTime)
 
-				buildTaskMetric.AddTime(prometheus.Labels{
-					"projectID":         project.Id,
-					"buildID":           int64ToString(build.Id),
-					"buildDefinitionID": int64ToString(build.Definition.Id),
-					"buildNumber":       build.BuildNumber,
-					"name":              timelineRecord.Name,
-					"id":                timelineRecord.Id,
-					"parentId":          timelineRecord.ParentId,
-					"workerName":        timelineRecord.WorkerName,
-					"result":            timelineRecord.Result,
-					"type":              "finished",
-				}, timelineRecord.FinishTime)
+				// 	buildTaskMetric.AddTime(prometheus.Labels{
+				// 		"projectID":         project.Id,
+				// 		"buildID":           int64ToString(build.Id),
+				// 		"buildDefinitionID": int64ToString(build.Definition.Id),
+				// 		"buildNumber":       build.BuildNumber,
+				// 		"name":              timelineRecord.Name,
+				// 		"id":                timelineRecord.Id,
+				// 		"parentId":          timelineRecord.ParentId,
+				// 		"workerName":        timelineRecord.WorkerName,
+				// 		"result":            timelineRecord.Result,
+				// 		"type":              "finished",
+				// 	}, timelineRecord.FinishTime)
 
-				buildTaskMetric.AddDuration(prometheus.Labels{
-					"projectID":         project.Id,
-					"buildID":           int64ToString(build.Id),
-					"buildDefinitionID": int64ToString(build.Definition.Id),
-					"buildNumber":       build.BuildNumber,
-					"name":              timelineRecord.Name,
-					"id":                timelineRecord.Id,
-					"parentId":          timelineRecord.ParentId,
-					"workerName":        timelineRecord.WorkerName,
-					"result":            timelineRecord.Result,
-					"type":              "duration",
-				}, timelineRecord.FinishTime.Sub(timelineRecord.StartTime))
+				// 	buildTaskMetric.AddDuration(prometheus.Labels{
+				// 		"projectID":         project.Id,
+				// 		"buildID":           int64ToString(build.Id),
+				// 		"buildDefinitionID": int64ToString(build.Definition.Id),
+				// 		"buildNumber":       build.BuildNumber,
+				// 		"name":              timelineRecord.Name,
+				// 		"id":                timelineRecord.Id,
+				// 		"parentId":          timelineRecord.ParentId,
+				// 		"workerName":        timelineRecord.WorkerName,
+				// 		"result":            timelineRecord.Result,
+				// 		"type":              "duration",
+				// 	}, timelineRecord.FinishTime.Sub(timelineRecord.StartTime))
 			}
 		}
 	}
