@@ -196,7 +196,7 @@ func (m *MetricsCollectorBuild) Collect(callback chan<- func()) {
 
 	for _, project := range AzureDevopsServiceDiscovery.ProjectList() {
 		projectLogger := logger.With(zap.String("project", project.Name))
-		// m.collectDefinition(ctx, projectLogger, callback, project)
+		m.collectDefinition(ctx, projectLogger, callback, project)
 		m.collectBuilds(ctx, projectLogger, callback, project)
 		m.collectBuildsTimeline(ctx, projectLogger, callback, project)
 		if nil != opts.AzureDevops.TagsSchema {
